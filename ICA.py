@@ -1,29 +1,31 @@
+import os
+
+from input_params import *
 from time import time
-import mne
 from mne.preprocessing import ICA
-from mne.datasets import sample
-import matplotlib.pyplot as plt
-import input_params
-
-raw_fname = input_params.raw_file_name
-
-raw = mne.io.read_raw_fif(raw_fname).crop(0, 60).pick('eeg').load_data()
-
-reject = dict(mag=5e-12, grad=4000e-13)
-raw.filter(1, 30, fir_design='firwin')
-
-
-def run_ica(method, fit_params=None):
-    ica = ICA(n_components=30, method=method, fit_params=fit_params,
-              max_iter='auto', random_state=0)
-    t0 = time()
-    ica.fit(raw, reject=reject)
-    fit_time = time() - t0
-    title = ('ICA decomposition using %s (took %.1fs)' % (method, fit_time))
-    figs = ica.plot_components(title=title)
-    for index, fig in enumerate(figs):
-        fig.savefig(f'./result_{index}.png')
-
+import mne
+import sys
 
 if __name__ == '__main__':
-    run_ica('fastica')
+    os.makedirs(name=f'./{task_output_dir}/', exist_ok=True)
+    logfile = open(f'./{task_output_dir}/logs.txt', mode='w')
+    sys.stdout = logfile
+    sys.stderr = logfile
+
+    raw_fname = raw_file_path
+    raw = mne.io.read_raw_fif(raw_fname).crop(crop_tmin, crop_tmax).pick(
+        using_channel).load_data()
+
+    raw.filter(filter_fmin, filter_fmax, fir_design='firwin')
+
+    ica = ICA(n_components=ica_components_count, method=ica_method, max_iter='auto',
+              random_state=0)
+    t0 = time()
+    ica.fit(raw)
+    fit_time = time() - t0
+    title = ('ICA decomposition using %s (took %.1fs)' % (ica_method, fit_time))
+    figs = ica.plot_components(title=title)
+
+    for index, fig in enumerate(figs):
+        fig.savefig(f'./{task_output_dir}/result_{index}.png')
+    logfile.close()
