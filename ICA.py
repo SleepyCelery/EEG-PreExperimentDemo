@@ -1,4 +1,4 @@
-import os
+import os.path
 
 from input_params import *
 from time import time
@@ -7,8 +7,8 @@ import mne
 import sys
 
 if __name__ == '__main__':
-    os.makedirs(name=f'./{task_output_dir}/', exist_ok=True)
-    logfile = open(f'./{task_output_dir}/logs.txt', mode='w')
+    os.makedirs(name=task_output_dir, exist_ok=True)
+    logfile = open(os.path.join(task_output_dir,'logs.txt'), mode='w')
     sys.stdout = logfile
     sys.stderr = logfile
 
@@ -27,5 +27,5 @@ if __name__ == '__main__':
     figs = ica.plot_components(title=title)
 
     for index, fig in enumerate(figs):
-        fig.savefig(f'./{task_output_dir}/result_{index}.png')
+        fig.savefig(f'{task_output_dir}/result_{index}.png')
     logfile.close()
