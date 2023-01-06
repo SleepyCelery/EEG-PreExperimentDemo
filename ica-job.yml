@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: manual-ica-demo
+spec:
+  template:
+    spec:
+      containers:
+      - name: ica
+        image: preexperiment/ica:0.1
+        env:
+        - name: RAW_FILE_PATH
+          value: "./MNE-sample-data/MEG/sample/sample_audvis_filt-0-40_raw.fif"
+        - name: ICA_METHOD
+          value: "fastica"
+        - name: ICA_COMPONENTS_COUNT
+          value: "20"
+        - name: CROP_TMIN
+          value: "0"
+        - name: CROP_TMAX
+          value: "60"
+        - name: USING_CHANNEL
+          value: "eeg"
+        - name: FILTER_FMIN
+          value: "1"
+        - name: FILTER_FMAX
+          value: "30"
+        volumeMounts:
+        - mountPath: /userdata
+          name: userdata-volume
+      restartPolicy: Never
+      volumes:
+      - name: userdata-volume
+        nfs:
+          server: 192.168.2.8
+          path: /userdata/chaoyihu
+  backoffLimit: 4
+  
